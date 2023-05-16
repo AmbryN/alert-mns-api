@@ -13,6 +13,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Logger logger = LoggerFactory.getLogger("UserRepository");
 
-    @Query(value = "SELECT u from User u JOIN FETCH u.roles r JOIN FETCH u.channels c WHERE u.email = :email")
+    @Query(value = "SELECT u from User u LEFT JOIN FETCH u.roles r LEFT JOIN FETCH u.channels c WHERE u.email = :email")
     Optional<User> findByEmail(String email);
 }

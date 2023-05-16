@@ -1,5 +1,6 @@
 package dev.ambryn.alertmntapi.controllers;
 
+import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.beans.Role;
 import dev.ambryn.alertmntapi.beans.User;
 import dev.ambryn.alertmntapi.dto.RoleDTO;
@@ -10,12 +11,13 @@ import dev.ambryn.alertmntapi.dto.user.UserGetFinestDTO;
 import dev.ambryn.alertmntapi.errors.DataAccessException;
 import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
-import dev.ambryn.alertmntapi.repositories.RoleRepository;
-import dev.ambryn.alertmntapi.repositories.UserRepository;
+import dev.ambryn.alertmntapi.repositories.*;
 import dev.ambryn.alertmntapi.responses.Created;
+import dev.ambryn.alertmntapi.responses.NoContent;
 import dev.ambryn.alertmntapi.responses.Ok;
 import dev.ambryn.alertmntapi.security.JwtUtils;
 import dev.ambryn.alertmntapi.validators.BeanValidator;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -36,6 +40,17 @@ public class UserController {
     UserRepository userRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    ChannelRepository channelRepository;
+    @Autowired
+    MessageRepository messageRepository;
+    @Autowired
+    NotificationRepository notificationRepository;
+    @Autowired
+    MeetingRepository meetingRepository;
+    @Autowired
+    GroupRepository groupRepository;
+
     @Autowired
     JwtUtils jwtUtils;
     @Autowired
@@ -102,5 +117,20 @@ public class UserController {
             return Ok.build();
         }
         throw new NotFoundException("Could not find user with id=" + id + " or role to add is not valid");
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity deleteUser(@PathVariable("id") Long id) {
+        logger.debug("Delete user with id={}", id);
+
+        channelRepository.deleteUserFromChannels(id);
+        messageRepository.deleteAllBySenderId(id);
+        meetingRepository.deleteAllByOrganizerId(id);
+        notificationRepository.deleteAllByReceiverId(id);
+        groupRepository.deleteUserFromGroups(id);
+
+        userRepository.deleteById(id);
+        return NoContent.build();
     }
 }
