@@ -30,7 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         Optional.ofNullable(request.getHeader("Authorization"))
                 .flatMap(header -> jwtUtils.extractJwtFromBearer(header))
-                .flatMap(jwtUtils::getData)
+                .map(jwtUtils::getData)
                 .map(data -> userDetailsService.loadUserByUsername(data.getSubject()))
                 .ifPresent(userDetails -> {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
@@ -42,7 +42,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(
                             request));
 
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                    SecurityContextHolder.getContext()
+                                         .setAuthentication(usernamePasswordAuthenticationToken);
                 });
         filterChain.doFilter(request, response);
     }

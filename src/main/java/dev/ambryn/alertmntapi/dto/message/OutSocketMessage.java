@@ -1,4 +1,6 @@
 package dev.ambryn.alertmntapi.dto.message;
 
-public record OutSocketMessage(String content){}
+import dev.ambryn.alertmntapi.dto.user.UserGetDTO;
+
+public record OutSocketMessage(UserGetDTO sender, String content) {}
 

@@ -55,7 +55,8 @@ public class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                                            ServerHttpResponse response,
                                            WebSocketHandler wsHandler,
                                            Map<String, Object> attributes) throws Exception {
-                Optional<String> oQuery = Optional.ofNullable(request.getURI().getQuery());
+                Optional<String> oQuery = Optional.ofNullable(request.getURI()
+                                                                     .getQuery());
                 if (oQuery.isPresent()) {
                     String query = oQuery.get();
                     Long channelId = Long.parseLong(query.substring(8, query.indexOf("&")));
@@ -69,7 +70,8 @@ public class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
                                                                                             .map(Channel::getId)
                                                                                             .toList());
                         if (oChannelIds.isPresent()) {
-                            return oChannelIds.get().contains(channelId);
+                            return oChannelIds.get()
+                                              .contains(channelId);
                         }
                     }
                 }

@@ -1,7 +1,8 @@
 package dev.ambryn.alertmntapi.errors;
 
-
+import com.fasterxml.jackson.annotation.JsonFilter;
 import dev.ambryn.alertmntapi.enums.EError;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -71,8 +72,6 @@ public class ApplicationError {
     private void setDetails(List<ApplicationError> details) {
         this.details = details;
     }
-
-
 
     public static class Builder {
         private final ApplicationError applicationError;

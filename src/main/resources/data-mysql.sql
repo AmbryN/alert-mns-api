@@ -31,9 +31,12 @@ INSERT INTO is_allowed_in(cha_id, usr_id)
 VALUES (1, 2);
 
 INSERT INTO subject(dtype, sub_sent_at, sub_channel)
-VALUES ('Message', NOW(), (SELECT cha_id FROM channel WHERE cha_name = 'DEVLOG Java'));
+VALUES ('Message', NOW(), (SELECT cha_id FROM channel WHERE cha_name = 'DEVLOG Java')),
+       ('Message', NOW(), (SELECT cha_id FROM channel WHERE cha_name = 'DEVLOG Java'));
 
 INSERT INTO message(sub_id, msg_content, msg_sender, msg_file)
-VALUES (last_insert_id(), 'Message de test', (SELECT usr_id FROM user WHERE usr_email = 'pierre.martin@message.fr'),
+VALUES (1, 'Message de test', (SELECT usr_id FROM user WHERE usr_email = 'pierre.martin@message.fr'),
+        null),
+       (2, 'Message 2', (SELECT usr_id FROM user WHERE usr_email = 'pierre.martin@message.fr'),
         null);
 

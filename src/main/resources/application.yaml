@@ -1,30 +1,32 @@
 spring:
-  devtools:
-    restart:
-      enabled: true
-      additional-paths: src/main/java
   datasource:
-    url: jdbc:mariadb://51.178.28.219:3306/discord
-    username: web
-    password: web
+    url: jdbc:mariadb://@DB_URL@/discord
+    username: @DB_USER@
+    password: @DB_PW@
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: @DB_HIBERNATE_INIT@
     database: mysql
-    defer-datasource-initialization: true
+    defer-datasource-initialization: @DB_DATASOURCE_INIT@
     database-platform: org.hibernate.dialect.MariaDBDialect
-    show-sql: true
+    show-sql: @DB_SHOW_SQL@
     properties:
       hibernate:
         format_sql: true
 
   sql:
     init:
-      platform: mysql
-      mode: always
+      platform: @DB_INIT_FILE@
+      mode: @DB_INIT_MODE@
+  jackson:
+    default-property-inclusion: non_null
 
 server:
   servlet:
     context-path: /alert-mns
+  port: 8080
+
+jwt:
+  secret: @JWT_SECRET@

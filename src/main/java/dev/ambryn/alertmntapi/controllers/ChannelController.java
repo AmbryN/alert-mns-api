@@ -2,6 +2,7 @@ package dev.ambryn.alertmntapi.controllers;
 
 import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.beans.User;
+import dev.ambryn.alertmntapi.dto.channel.ChannelGetFinestDTO;
 import dev.ambryn.alertmntapi.dto.message.MessageGetDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelCreateDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetDTO;
@@ -42,14 +43,17 @@ public class ChannelController {
 
     @GetMapping
     public ResponseEntity<List<ChannelGetDTO>> getChannels() {
-        List<ChannelGetDTO> channels = channelRepository.findAll().stream().map(ChannelMapper::toDTO).toList();
+        List<ChannelGetDTO> channels = channelRepository.findAll()
+                                                        .stream()
+                                                        .map(ChannelMapper::toDTO)
+                                                        .toList();
         return Ok.build(channels);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChannelGetDTO> getChannel(@PathVariable("id") Long id) {
+    public ResponseEntity<ChannelGetFinestDTO> getChannel(@PathVariable("id") Long id) {
         return channelRepository.findById(id)
-                                .map(ChannelMapper::toDTO)
+                                .map(ChannelMapper::toFinestDTO)
                                 .map(Ok::build)
                                 .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + id));
     }
@@ -58,11 +62,12 @@ public class ChannelController {
     public ResponseEntity<List<MessageGetDTO>> getMessages(@PathVariable("id") Long id) {
         return channelRepository.findById(id)
                                 .map(Channel::getMessages)
-                                .map(messages -> messages.stream().map(MessageMapper::toDTO).toList())
+                                .map(messages -> messages.stream()
+                                                         .map(MessageMapper::toDTO)
+                                                         .toList())
                                 .map(Ok::build)
 
-                                .orElseThrow(() -> new NotFoundException("Could not find messages of channel with " +
-                                                                                 "id=" + id));
+                                .orElseThrow(() -> new NotFoundException("Could not find messages of channel with " + "id=" + id));
     }
 
     /**

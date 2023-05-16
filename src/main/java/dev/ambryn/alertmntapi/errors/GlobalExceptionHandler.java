@@ -24,9 +24,18 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.Unauthorized);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                             .body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handle(BadRequestException exception) {
+        ApplicationError.Builder builder = new ApplicationError.Builder();
+        builder.setCode(EError.BadArgument);
+        builder.setMessage(exception.getMessage());
+        ApplicationError error = builder.build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(HttpClientErrorException.BadRequest.class)
@@ -35,9 +44,8 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.BadArgument);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -46,11 +54,9 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.BadArgument);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ErrorResponse(error));
     }
-
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponse> handle(NotFoundException exception) {
@@ -58,9 +64,8 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.NotFound);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                             .body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(ForbiddenException.class)
@@ -69,9 +74,8 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.Forbidden);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                             .body(new ErrorResponse(error));
     }
 
     @ExceptionHandler(InternalServerException.class)
@@ -80,12 +84,21 @@ public class GlobalExceptionHandler {
         builder.setCode(EError.ServerError);
         builder.setMessage(exception.getMessage());
         ApplicationError error = builder.build();
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(new ErrorResponse(error));
     }
 
-        @ExceptionHandler(ConstraintViolationException.class)
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handle(InvalidTokenException exception) {
+        ApplicationError.Builder builder = new ApplicationError.Builder();
+        builder.setCode(EError.Forbidden);
+        builder.setMessage(exception.getMessage());
+        ApplicationError error = builder.build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                             .body(new ErrorResponse(error));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handle(ConstraintViolationException exception) {
         List<ConstraintViolationBean> messages = new ArrayList<>();
         List<ApplicationError> errors = new ArrayList<>();
@@ -106,9 +119,8 @@ public class GlobalExceptionHandler {
         builder.setDetails(errors);
         ApplicationError error = builder.build();
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(error));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ErrorResponse(error));
     }
 
     public static class ConstraintViolationBean {
@@ -123,7 +135,8 @@ public class GlobalExceptionHandler {
             }
             this.target = propertyPath;
             this.message = constraintViolation.getMessage();
-            if (constraintViolation.getInvalidValue() != null) this.value = constraintViolation.getInvalidValue().toString();
+            if (constraintViolation.getInvalidValue() != null) this.value = constraintViolation.getInvalidValue()
+                                                                                               .toString();
             else this.value = null;
         }
 

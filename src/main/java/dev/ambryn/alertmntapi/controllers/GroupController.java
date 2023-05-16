@@ -12,11 +12,13 @@ import dev.ambryn.alertmntapi.dto.user.UserGetDTO;
 import dev.ambryn.alertmntapi.enums.EError;
 import dev.ambryn.alertmntapi.errors.ApplicationError;
 import dev.ambryn.alertmntapi.errors.DataAccessException;
+import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.GroupRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
 import dev.ambryn.alertmntapi.responses.Ok;
 import dev.ambryn.alertmntapi.validators.BeanValidator;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,26 +43,29 @@ public class GroupController {
     public ResponseEntity<List<GroupGetDTO>> getGroups() {
         logger.debug("Getting all groups");
         List<GroupGetDTO> groups = groupRepository.findAll()
-                .stream().map(GroupMapper::toDTO)
-                .toList();
+                                                  .stream()
+                                                  .map(GroupMapper::toDTO)
+                                                  .toList();
         return Ok.build(groups);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GroupGetFinestDTO> getGroup(@PathVariable("id") Long id) {
         return groupRepository.findById(id)
-                .map(GroupMapper::toFinestDTO)
-                .map(Ok::build)
-                .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
+                              .map(GroupMapper::toFinestDTO)
+                              .map(Ok::build)
+                              .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
     }
 
     @GetMapping("/{id}/members")
     public ResponseEntity<List<UserGetDTO>> getMembers(@PathVariable("id") Long id) {
         return groupRepository.findById(id)
-                .map(Group::getMembers)
-                .map(users -> users.stream().map(UserMapper::toDto).toList())
-                .map(Ok::build)
-                .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
+                              .map(Group::getMembers)
+                              .map(users -> users.stream()
+                                                 .map(UserMapper::toDto)
+                                                 .toList())
+                              .map(Ok::build)
+                              .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
     }
 
     @PostMapping
@@ -68,23 +73,20 @@ public class GroupController {
         BeanValidator.validate(newGroup);
 
         Group group = GroupMapper.toGroup(newGroup);
-
-        ResponseEntity response = null;
+        
         try {
             groupRepository.save(group);
-            response = ResponseEntity.ok(group);
+            return Ok.build(GroupMapper.toDTO(group));
         } catch (DataAccessException dae) {
-            ApplicationError error = new ApplicationError.Builder()
-                    .setCode(EError.ServerError)
-                    .setMessage(dae.getMessage())
-                    .build();
-            response = ResponseEntity.internalServerError().body(error);;
+            ApplicationError error = new ApplicationError.Builder().setCode(EError.ServerError)
+                                                                   .setMessage(dae.getMessage())
+                                                                   .build();
+            throw new InternalServerException(dae.getMessage());
         }
-        return response;
     }
 
     @PostMapping("/{id:[0-9]+}/members")
-//    @Authorize(level = ERole.ADMIN)
+    //    @Authorize(level = ERole.ADMIN)
     public ResponseEntity<UserGetDTO> addMember(@PathVariable("id") Long id, @RequestBody AddDTO userToAdd) {
         BeanValidator.validate(userToAdd);
 
@@ -100,7 +102,8 @@ public class GroupController {
                     group.addMember(user);
                     groupRepository.save(group);
 
-                    return ResponseEntity.ok().build();
+                    return ResponseEntity.ok()
+                                         .build();
                 } else {
                     throw new NotFoundException("Could not find user with id=" + userToAdd.id());
                 }

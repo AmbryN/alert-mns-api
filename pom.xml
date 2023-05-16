@@ -11,8 +11,9 @@
     <groupId>dev.ambryn</groupId>
     <artifactId>alertmns-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>alertmnt-api</name>
-    <description>alertmnt-api</description>
+    <name>alertmns-api</name>
+    <description>alertmns-api</description>
+    <packaging>war</packaging>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -32,6 +33,24 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <!-- Used for XML generation-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>2.11.1</version>
+        </dependency>
+        <!-- Needed for Tomcat 10 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <version>4.0.1</version>
         </dependency>
 
         <dependency>
@@ -65,6 +84,7 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -89,7 +109,38 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.0.2</version>
+        </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <DB_HIBERNATE_INIT>create-drop</DB_HIBERNATE_INIT>
+                <DB_DATASOURCE_INIT>true</DB_DATASOURCE_INIT>
+                <DB_INIT_FILE>mysql</DB_INIT_FILE>
+                <DB_INIT_MODE>always</DB_INIT_MODE>
+                <DB_SHOW_SQL>true</DB_SHOW_SQL>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>prod</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <DB_HIBERNATE_INIT>none</DB_HIBERNATE_INIT>
+                <DB_DATASOURCE_INIT>false</DB_DATASOURCE_INIT>
+                <DB_INIT_MODE>never</DB_INIT_MODE>
+                <DB_SHOW_SQL>false</DB_SHOW_SQL>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -103,6 +154,15 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <skipTests>${skipUnitTests}</skipTests>
                 </configuration>
             </plugin>
         </plugins>

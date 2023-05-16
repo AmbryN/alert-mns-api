@@ -39,12 +39,14 @@ public class SecurityConfig {
                 return cors;
             })
             .and()
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login")
-                                                         .permitAll()
-                                                         .requestMatchers("/chat")
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login",
+                                                                          "/chat",
+                                                                          "/swagger-ui/**",
+                                                                          "/v3/**",
+                                                                          "/extract/**")
                                                          .permitAll()
                                                          .requestMatchers("/**")
-                                                         .hasRole("USER")
+                                                         .hasAnyRole("USER", "ADMIN")
                                                          .anyRequest()
                                                          .authenticated())
             .exceptionHandling()

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
-//@Authorize
 public class UserController {
 
     Logger logger = LoggerFactory.getLogger("UserController");
@@ -45,9 +45,9 @@ public class UserController {
     public ResponseEntity<List<UserGetDTO>> getUsers() {
         logger.debug("Getting all users");
         List<UserGetDTO> users = userRepository.findAll()
-                .stream()
-                .map(UserMapper::toDto)
-                .toList();
+                                               .stream()
+                                               .map(UserMapper::toDto)
+                                               .toList();
         return Ok.build(users);
     }
 
@@ -55,19 +55,19 @@ public class UserController {
     public ResponseEntity<UserGetFinestDTO> getUser(@PathVariable("id") Long id) {
         logger.debug("Getting user with id={}", id);
         return userRepository.findById(id)
-                .map(UserMapper::toFinestDto)
-                .map(Ok::build)
-                .orElseThrow(() -> new NotFoundException("Could not find user with id=" + id));
+                             .map(UserMapper::toFinestDto)
+                             .map(Ok::build)
+                             .orElseThrow(() -> new NotFoundException("Could not find user with id=" + id));
     }
 
     @GetMapping("/profile")
     public ResponseEntity<UserGetFinestDTO> getProfile(@RequestHeader("Authorization") String token) {
         logger.debug("Getting user profile");
         return jwtUtils.getEmailFromBearer(token)
-                .flatMap(email -> userRepository.findByEmail(email))
-                .map(UserMapper::toFinestDto)
-                .map(user -> Ok.build(user))
-                .orElseThrow(() -> new NotFoundException("Could not find user corresponding to Jwt"));
+                       .flatMap(email -> userRepository.findByEmail(email))
+                       .map(UserMapper::toFinestDto)
+                       .map(user -> Ok.build(user))
+                       .orElseThrow(() -> new NotFoundException("Could not find user corresponding to Jwt"));
     }
 
     @PostMapping

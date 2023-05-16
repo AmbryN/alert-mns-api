@@ -2,9 +2,11 @@ package dev.ambryn.alertmntapi.controllers;
 
 import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.beans.Message;
+import dev.ambryn.alertmntapi.dto.mappers.dto.UserMapper;
 import dev.ambryn.alertmntapi.dto.message.OutSocketMessage;
 import dev.ambryn.alertmntapi.beans.User;
 import dev.ambryn.alertmntapi.dto.message.InSocketMessage;
+import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.ChannelRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,21 +26,19 @@ public class MessageController {
     @Autowired
     private UserRepository userRepository;
 
-    @MessageMapping("/chat/{id}")
-    @SendTo("/topic/messages/{id}")
+    @MessageMapping("/chat/{channelId}")
+    @SendTo("/topic/messages/{channelId}")
     @Transactional
-    public OutSocketMessage send(@DestinationVariable Long id, @RequestBody InSocketMessage inSocketMessage) {
-        Optional<Channel> oChannel = channelRepository.findById(id);
-        Optional<User> oUser = userRepository.findById(inSocketMessage.userId());
+    public OutSocketMessage send(@DestinationVariable Long channelId, @RequestBody InSocketMessage inSocketMessage) {
+        Channel channel = channelRepository.findById(channelId)
+                                           .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + channelId));
 
-        if (oChannel.isPresent() && oUser.isPresent()) {
-            Channel channel = oChannel.get();
-            User user = oUser.get();
-            Message message = new Message(channel, user, inSocketMessage.content());
-            System.out.println(message);
-            channel.addMessage(message);
-            channelRepository.save(channel);
-        }
-        return new OutSocketMessage(inSocketMessage.content());
+        User user = userRepository.findById(inSocketMessage.userId())
+                                  .orElseThrow(() -> new NotFoundException("Could not find user with id=" + channelId));
+
+        Message message = new Message(channel, user, inSocketMessage.content());
+        channel.addMessage(message);
+        channelRepository.save(channel);
+        return new OutSocketMessage(UserMapper.toDto(user), inSocketMessage.content());
     }
 }
