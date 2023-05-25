@@ -26,18 +26,12 @@ public class Channel {
     private EVisibility visibility;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "is_allowed_in",
-            joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"),
-            inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id")
-    )
+    @JoinTable(name = "is_allowed_in", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id"))
     @ToString.Exclude
     private Set<User> members = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "has_subscribed_to",
-            joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"),
-            inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id")
-    )
+    @JoinTable(name = "has_subscribed_to", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id"))
     @ToString.Exclude
     private Set<User> subscribers = new HashSet<>();
 
@@ -85,22 +79,24 @@ public class Channel {
     }
 
     public List<User> getSubscribers() {
-        return Collections.unmodifiableList(subscribers.stream().toList());
+        return Collections.unmodifiableList(subscribers.stream()
+                                                       .toList());
     }
 
     public List<User> getMembers() {
-        return Collections.unmodifiableList(members.stream().toList());
+        return Collections.unmodifiableList(members.stream()
+                                                   .toList());
     }
 
     public List<Message> getMessages() {
-        return  this.messages;
+        return Collections.unmodifiableList(this.messages);
     }
 
     public List<Meeting> getMeetings() {
         return Collections.unmodifiableList(meetings);
     }
 
-    public void notifySubscribers()  {
+    public void notifySubscribers() {
         // TODO
     }
 
@@ -109,9 +105,7 @@ public class Channel {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Channel channel = (Channel) o;
-        return Objects.equals(id, channel.id)
-                && Objects.equals(name, channel.name)
-                && visibility == channel.visibility;
+        return Objects.equals(id, channel.id) && Objects.equals(name, channel.name) && visibility == channel.visibility;
     }
 
     @Override

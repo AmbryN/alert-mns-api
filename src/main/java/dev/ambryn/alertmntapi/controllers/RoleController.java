@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
-//@Authorize(level = ERole.ADMIN)
 public class RoleController {
 
     private final Logger logger = LoggerFactory.getLogger("RoleController");
@@ -28,8 +27,9 @@ public class RoleController {
     public ResponseEntity<List<RoleDTO>> getRoles() {
         logger.debug("Getting all roles");
         List<RoleDTO> roles = roleRepository.findAll()
-                .stream().map(RoleMapper::toDTO)
-                .toList();
+                                            .stream()
+                                            .map(RoleMapper::toDTO)
+                                            .toList();
         return Ok.build(roles);
     }
 }

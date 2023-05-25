@@ -1,6 +1,8 @@
 package dev.ambryn.alertmntapi.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,9 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Value("${cors.domain}")
+    private String domain;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.httpBasic()
@@ -35,20 +40,20 @@ public class SecurityConfig {
                 CorsConfiguration cors = new CorsConfiguration();
                 cors.applyPermitDefaultValues();
                 cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
-                cors.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:4200"));
+                cors.setExposedHeaders(List.of("Content-Disposition"));
+                cors.setAllowedOrigins(List.of(domain));
                 return cors;
             })
             .and()
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login",
-                                                                          "/chat",
-                                                                          "/swagger-ui/**",
-                                                                          "/v3/**",
-                                                                          "/extract/**")
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login", "/chat")
                                                          .permitAll()
+                                                         .requestMatchers("/groups/**", "/roles/**")
+                                                         .hasRole("ADMIN")
                                                          .requestMatchers("/**")
                                                          .hasAnyRole("USER", "ADMIN")
                                                          .anyRequest()
                                                          .authenticated())
+
             .exceptionHandling()
             .and()
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

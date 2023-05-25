@@ -1,5 +1,9 @@
 package dev.ambryn.alertmntapi.enums;
 
+import dev.ambryn.alertmntapi.errors.BadRequestException;
+
+import java.util.Optional;
+
 public enum FileFormat {
 
     CSV("text/csv", ".csv"), JSON("application/json", ".json"), XML("text/xml", ".xml");

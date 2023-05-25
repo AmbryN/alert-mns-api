@@ -10,14 +10,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import org.glassfish.soteria.identitystores.hash.Pbkdf2PasswordHashImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -73,9 +67,6 @@ public class User {
     private Set<Notification> queue = new HashSet<>();
 
     public User() {
-        Role role = new Role();
-        role.setId(1L);
-        this.roles.add(role);
     }
 
     public User(String email, String password, String lastname, String firstname) {
@@ -89,6 +80,14 @@ public class User {
 
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = new HashSet<>(roles);
+    }
+
+    public boolean hasRole(Role role) {
+        return this.roles.contains(role);
     }
 
     public void removeRole(Role role) {
@@ -109,8 +108,6 @@ public class User {
     }
 
     public void setPassword(String password) {
-        Pbkdf2PasswordHashImpl passwordHasher = new Pbkdf2PasswordHashImpl();
-        //        this.password = passwordHasher.generate(password.toCharArray());
         this.password = password;
     }
 

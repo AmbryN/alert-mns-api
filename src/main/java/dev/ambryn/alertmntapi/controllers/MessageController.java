@@ -8,6 +8,7 @@ import dev.ambryn.alertmntapi.beans.User;
 import dev.ambryn.alertmntapi.dto.message.InSocketMessage;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.ChannelRepository;
+import dev.ambryn.alertmntapi.repositories.MessageRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class MessageController {
     @Autowired
     private ChannelRepository channelRepository;
     @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
     private UserRepository userRepository;
 
     @MessageMapping("/chat/{channelId}")
@@ -37,8 +40,7 @@ public class MessageController {
                                   .orElseThrow(() -> new NotFoundException("Could not find user with id=" + channelId));
 
         Message message = new Message(channel, user, inSocketMessage.content());
-        channel.addMessage(message);
-        channelRepository.save(channel);
+        messageRepository.save(message);
         return new OutSocketMessage(UserMapper.toDto(user), inSocketMessage.content());
     }
 }

@@ -7,7 +7,7 @@ VALUES ('julie.dupont@message.fr',
         '$2a$10$7wEts30./7J7HvkJ/rIYOeYX8weaGPV6ybZCO73dZj7RrJedbrE0u',
         'DUPONT', 'Julie');
 INSERT INTO user(usr_email, usr_password, usr_lastname, usr_firstname)
-VALUES ('jean.dufour@message.fr', 'test', 'DUFOUR', 'Jean');
+VALUES ('jean.dufour@message.fr', 'testtest', 'DUFOUR', 'Jean');
 
 INSERT INTO role(rol_name)
 VALUES (0),

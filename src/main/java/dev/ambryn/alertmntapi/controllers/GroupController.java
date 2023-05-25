@@ -73,7 +73,7 @@ public class GroupController {
         BeanValidator.validate(newGroup);
 
         Group group = GroupMapper.toGroup(newGroup);
-        
+
         try {
             groupRepository.save(group);
             return Ok.build(GroupMapper.toDTO(group));
@@ -86,32 +86,41 @@ public class GroupController {
     }
 
     @PostMapping("/{id:[0-9]+}/members")
-    //    @Authorize(level = ERole.ADMIN)
-    public ResponseEntity<UserGetDTO> addMember(@PathVariable("id") Long id, @RequestBody AddDTO userToAdd) {
-        BeanValidator.validate(userToAdd);
+    public ResponseEntity<?> addMembers(@PathVariable("id") Long id, @RequestBody List<AddDTO> usersToAdd) {
+        usersToAdd.forEach(userToAdd -> BeanValidator.validate(userToAdd));
 
         try {
-            Optional<Group> oGroup = groupRepository.findById(id);
+            Group group = groupRepository.findById(id)
+                                         .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
 
-            if (oGroup.isPresent()) {
-                Group group = oGroup.get();
-                Optional<User> oUser = userRepository.findById(userToAdd.id());
+            usersToAdd.stream()
+                      .map(user -> userRepository.findById(user.id())
+                                                 .orElseThrow(() -> new NotFoundException("Could not find user with " + "id=" + user.id())))
+                      .forEach(user -> group.addMember(user));
 
-                if (oUser.isPresent()) {
-                    User user = oUser.get();
-                    group.addMember(user);
-                    groupRepository.save(group);
+            groupRepository.save(group);
 
-                    return ResponseEntity.ok()
-                                         .build();
-                } else {
-                    throw new NotFoundException("Could not find user with id=" + userToAdd.id());
-                }
-            } else {
-                throw new NotFoundException("Could not find group with id=" + id);
-            }
+            return Ok.build(GroupMapper.toFinestDTO(group));
         } catch (DataAccessException dae) {
-            throw new InternalError(dae.getMessage());
+            throw new InternalServerException(dae.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id:[0-9]+}/members/{userId:[0-9]+}")
+    public ResponseEntity<?> addMember(@PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        try {
+            Group group = groupRepository.findById(id)
+                                         .orElseThrow(() -> new NotFoundException("Could not find group with id=" + id));
+
+            User user = userRepository.findById(userId)
+                                      .orElseThrow(() -> new NotFoundException("Could not find user with id=" + userId));
+
+            group.removeMember(user);
+            groupRepository.save(group);
+
+            return Ok.build(GroupMapper.toFinestDTO(group));
+        } catch (DataAccessException dae) {
+            throw new InternalServerException(dae.getMessage());
         }
     }
 }

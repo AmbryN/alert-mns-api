@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://@DB_URL@/discord
+    url: jdbc:mariadb://@DB_URL@/@DB_NAME@
     username: @DB_USER@
     password: @DB_PW@
     driver-class-name: org.mariadb.jdbc.Driver
@@ -25,8 +25,12 @@ spring:
 
 server:
   servlet:
-    context-path: /alert-mns
+    context-path: /
   port: 8080
 
 jwt:
   secret: @JWT_SECRET@
+
+cors:
+  domain: http://localhost:4200
+

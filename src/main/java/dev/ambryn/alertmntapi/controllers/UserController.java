@@ -1,13 +1,13 @@
 package dev.ambryn.alertmntapi.controllers;
 
-import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.beans.Role;
 import dev.ambryn.alertmntapi.beans.User;
-import dev.ambryn.alertmntapi.dto.RoleDTO;
 import dev.ambryn.alertmntapi.dto.mappers.dto.UserMapper;
 import dev.ambryn.alertmntapi.dto.user.UserCreateDTO;
 import dev.ambryn.alertmntapi.dto.user.UserGetDTO;
 import dev.ambryn.alertmntapi.dto.user.UserGetFinestDTO;
+import dev.ambryn.alertmntapi.dto.user.UserUpdateDTO;
+import dev.ambryn.alertmntapi.enums.ERole;
 import dev.ambryn.alertmntapi.errors.DataAccessException;
 import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
@@ -22,14 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -81,8 +79,40 @@ public class UserController {
         return jwtUtils.getEmailFromBearer(token)
                        .flatMap(email -> userRepository.findByEmail(email))
                        .map(UserMapper::toFinestDto)
-                       .map(user -> Ok.build(user))
+                       .map(Ok::build)
                        .orElseThrow(() -> new NotFoundException("Could not find user corresponding to Jwt"));
+    }
+
+    @PutMapping
+    public ResponseEntity<UserGetFinestDTO> updateUser(@RequestBody UserUpdateDTO userDTO) {
+        logger.debug("Updating user={}", userDTO);
+        BeanValidator.validate(userDTO);
+
+        User user = userRepository.findById(userDTO.id())
+                                  .orElseThrow(() -> new NotFoundException("Could not find User with id=" + userDTO.id()));
+
+        user.setFirstname(userDTO.firstname());
+        user.setLastname(userDTO.lastname());
+        user.setEmail(userDTO.email());
+
+        if (userDTO.roles() != null) {
+            Set<Role> roles = userDTO.roles()
+                                     .stream()
+                                     .map(role -> roleRepository.findById(role.id())
+                                                                .orElseThrow(() -> new NotFoundException(
+                                                                        "Could not find role with id=" + role.id())))
+                                     .collect(Collectors.toSet());
+
+            roles.add(roleRepository.findByName(ERole.ROLE_USER)
+                                    .orElseThrow(() -> new InternalServerException("Could not find role user")));
+            user.setRoles(roles);
+        }
+        try {
+            userRepository.save(user);
+            return Ok.build(UserMapper.toFinestDto(user));
+        } catch (DataAccessException dae) {
+            throw new InternalServerException(dae.getMessage());
+        }
     }
 
     @PostMapping
@@ -91,9 +121,10 @@ public class UserController {
         BeanValidator.validate(userDTO);
 
         User user = UserMapper.toUser(userDTO);
-        user.setPassword("testtest");
-        System.out.println(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Role role = roleRepository.findByName(ERole.ROLE_USER)
+                                  .orElseThrow(() -> new InternalServerException("Could not find role USER"));
+        user.addRole(role);
         try {
             userRepository.save(user);
             System.out.println(user);
@@ -103,25 +134,27 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{id}/roles")
-    public ResponseEntity addRole(@PathVariable("id") Long id, RoleDTO roleToAdd) {
-        logger.debug("Add role {} to user with id={}", roleToAdd, id);
-        BeanValidator.validate(roleToAdd);
-
-        Optional<User> oUser = userRepository.findById(id);
-        Optional<Role> oRole = roleRepository.findById(roleToAdd.id());
-        if (oUser.isPresent() && oRole.isPresent()) {
-            User user = oUser.get();
-            user.addRole(oRole.get());
-            userRepository.save(user);
-            return Ok.build();
-        }
-        throw new NotFoundException("Could not find user with id=" + id + " or role to add is not valid");
-    }
+    //    @PostMapping("/{id}/roles")
+    //    public ResponseEntity<UserGetFinestDTO> addRole(@PathVariable("id") Long id, List<AddDTO> rolesToAdd) {
+    //        logger.debug("Add role {} to user with id={}", rolesToAdd, id);
+    //        rolesToAdd.forEach(BeanValidator::validate);
+    //
+    //        User user = userRepository.findById(id)
+    //                                  .orElseThrow(() -> new NotFoundException("Could not find user with id=" + id));
+    //
+    //        rolesToAdd.stream()
+    //                  .map(role -> roleRepository.findById(role.id())
+    //                                             .orElseThrow(() -> new NotFoundException("Could not find role with
+    //                                             id=" + id)))
+    //                  .forEach(user::addRole);
+    //
+    //        userRepository.save(user);
+    //        return Ok.build(UserMapper.toFinestDto(user));
+    //    }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity deleteUser(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
         logger.debug("Delete user with id={}", id);
 
         channelRepository.deleteUserFromChannels(id);

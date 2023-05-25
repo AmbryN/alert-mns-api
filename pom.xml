@@ -136,6 +136,7 @@
                 <skipUnitTests>true</skipUnitTests>
                 <DB_HIBERNATE_INIT>none</DB_HIBERNATE_INIT>
                 <DB_DATASOURCE_INIT>false</DB_DATASOURCE_INIT>
+                <DB_INIT_FILE>mysql</DB_INIT_FILE>
                 <DB_INIT_MODE>never</DB_INIT_MODE>
                 <DB_SHOW_SQL>false</DB_SHOW_SQL>
             </properties>
