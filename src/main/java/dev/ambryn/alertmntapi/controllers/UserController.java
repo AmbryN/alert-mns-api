@@ -134,24 +134,6 @@ public class UserController {
         }
     }
 
-    //    @PostMapping("/{id}/roles")
-    //    public ResponseEntity<UserGetFinestDTO> addRole(@PathVariable("id") Long id, List<AddDTO> rolesToAdd) {
-    //        logger.debug("Add role {} to user with id={}", rolesToAdd, id);
-    //        rolesToAdd.forEach(BeanValidator::validate);
-    //
-    //        User user = userRepository.findById(id)
-    //                                  .orElseThrow(() -> new NotFoundException("Could not find user with id=" + id));
-    //
-    //        rolesToAdd.stream()
-    //                  .map(role -> roleRepository.findById(role.id())
-    //                                             .orElseThrow(() -> new NotFoundException("Could not find role with
-    //                                             id=" + id)))
-    //                  .forEach(user::addRole);
-    //
-    //        userRepository.save(user);
-    //        return Ok.build(UserMapper.toFinestDto(user));
-    //    }
-
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
