@@ -18,7 +18,7 @@ import dev.ambryn.alertmntapi.repositories.UserRepository;
 import dev.ambryn.alertmntapi.responses.Created;
 import dev.ambryn.alertmntapi.responses.Ok;
 import dev.ambryn.alertmntapi.security.JwtUtils;
-import dev.ambryn.alertmntapi.services.AuthorizationService;
+import dev.ambryn.alertmntapi.services.AuthorizationUtils;
 import dev.ambryn.alertmntapi.validators.BeanValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,9 +37,6 @@ public class ChannelController {
     UserRepository userRepository;
     @Autowired
     JwtUtils jwtUtils;
-
-    @Autowired
-    AuthorizationService authorizationService;
 
     @GetMapping
     public ResponseEntity<List<ChannelGetDTO>> getChannels() {
@@ -89,7 +86,7 @@ public class ChannelController {
 
             if (oUser.isPresent()) {
                 User user = oUser.get();
-                boolean isAdmin = authorizationService.isAdmin(user);
+                boolean isAdmin = AuthorizationUtils.isAdmin(user);
 
                 if (isAdmin || channelCreateDTO.visibility() == EVisibility.PRIVATE) {
                     Channel newChannel = ChannelMapper.toChannel(channelCreateDTO);

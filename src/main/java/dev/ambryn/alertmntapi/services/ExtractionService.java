@@ -1,25 +1,22 @@
 package dev.ambryn.alertmntapi.services;
 
-import dev.ambryn.alertmntapi.beans.*;
-import dev.ambryn.alertmntapi.enums.FileFormat;
+import dev.ambryn.alertmntapi.beans.Channel;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ExtractionService {
 
-    public byte[] convert(Channel channel, FileFormat format) {
-        ConversionStrategy strategy = null;
-        switch (format) {
-            case CSV -> {
-                strategy = new CSVConversion();
-            }
-            case JSON -> {
-                strategy = new JSONConversion();
-            }
-            case XML -> {
-                strategy = new XMLConversion();
-            }
-        }
+    ConversionStrategy strategy;
+
+    public ExtractionService() {
+        this.strategy = new CSVConversion();
+    }
+
+    public ExtractionService(ConversionStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public byte[] convert(Channel channel) {
         return strategy.convert(channel);
     }
 }

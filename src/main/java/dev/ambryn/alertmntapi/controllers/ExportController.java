@@ -5,19 +5,17 @@ import dev.ambryn.alertmntapi.beans.User;
 import dev.ambryn.alertmntapi.enums.FileFormat;
 import dev.ambryn.alertmntapi.errors.BadRequestException;
 import dev.ambryn.alertmntapi.errors.ForbiddenException;
-import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.ChannelRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
-import dev.ambryn.alertmntapi.security.MyUserDetails;
-import dev.ambryn.alertmntapi.services.AuthorizationService;
-import dev.ambryn.alertmntapi.services.ExtractionService;
+import dev.ambryn.alertmntapi.services.AuthorizationUtils;
+import dev.ambryn.alertmntapi.services.FileService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @RestController
@@ -39,16 +35,14 @@ public class ExportController {
     ChannelRepository channelRepository;
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    AuthorizationService authorizationService;
 
     @Autowired
-    ExtractionService extractionService;
+    FileService fileService;
 
     @GetMapping(value = "/{id}")
-    public byte[] exportChannel(HttpServletResponse res,
-                                @PathVariable("id") Long id,
-                                @Param("format") Optional<String> format) {
+    public ResponseEntity<byte[]> exportChannel(HttpServletResponse res,
+                                                @PathVariable("id") Long id,
+                                                @Param("format") Optional<String> format) {
         logger.debug("Exporting Channel with id={}", id);
 
         Channel channel = channelRepository.findById(id)
@@ -59,7 +53,7 @@ public class ExportController {
         User user = userRepository.findByEmail(userdetails.getUsername())
                                   .orElseThrow(() -> new NotFoundException("Could not find user with email=" + userdetails.getUsername()));
 
-        boolean isAllowedToExport = authorizationService.isMemberOrAdmin(user, channel);
+        boolean isAllowedToExport = AuthorizationUtils.isMemberOrAdmin(user, channel);
         if (!isAllowedToExport) throw new ForbiddenException("You do not have permissions to do this action");
 
         FileFormat fileFormat = format.map(String::toUpperCase)
@@ -72,16 +66,6 @@ public class ExportController {
                                       })
                                       .orElse(FileFormat.CSV);
 
-        String now = LocalDateTime.now()
-                                  .format(DateTimeFormatter.ofPattern("YMMd-H_m"));
-        String filename = now + "_channel_" + id + fileFormat.getExtension();
-        res.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
-
-        try {
-            res.setHeader("Content-Type", fileFormat.getHeader());
-            return extractionService.convert(channel, fileFormat);
-        } catch (RuntimeException e) {
-            throw new InternalServerException("Could not extract data from channel with id=" + channel.getId());
-        }
+        return fileService.generateFrom(channel, fileFormat);
     }
 }

@@ -14,13 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-class AuthorizationServiceTest {
+class AuthorizationUtilsTest {
 
     Channel channel;
     User user;
-
-    @Autowired
-    AuthorizationService authorizationService;
 
     @BeforeEach
     void setup() {
@@ -33,7 +30,7 @@ class AuthorizationServiceTest {
         // WHEN
         user.addRole(new Role(ERole.ROLE_ADMIN));
 
-        assertTrue(authorizationService.isAdmin(user));
+        assertTrue(AuthorizationUtils.isAdmin(user));
     }
 
     @Test
@@ -41,7 +38,7 @@ class AuthorizationServiceTest {
         // WHEN
         user.addRole(new Role(ERole.ROLE_USER));
 
-        assertFalse(authorizationService.isAdmin(user));
+        assertFalse(AuthorizationUtils.isAdmin(user));
     }
 
     @Test
@@ -49,17 +46,17 @@ class AuthorizationServiceTest {
         // WHEN
         channel.addMember(user);
 
-        assertTrue(authorizationService.isMember(user, channel));
+        assertTrue(AuthorizationUtils.isMember(user, channel));
     }
 
     @Test
     void isMember_ReturnsFalseWhenUserIsNotMember() {
-        assertFalse(authorizationService.isMember(user, channel));
+        assertFalse(AuthorizationUtils.isMember(user, channel));
     }
 
     @Test
     void isMemberOrAdmin_ReturnsFalseWhenUserNorMemberNorAdmin() {
-        assertFalse(authorizationService.isMemberOrAdmin(user, channel));
+        assertFalse(AuthorizationUtils.isMemberOrAdmin(user, channel));
     }
 
     @Test
@@ -67,20 +64,20 @@ class AuthorizationServiceTest {
         channel.addMember(user);
         user.addRole(new Role(ERole.ROLE_ADMIN));
 
-        assertTrue(authorizationService.isMemberOrAdmin(user, channel));
+        assertTrue(AuthorizationUtils.isMemberOrAdmin(user, channel));
     }
 
     @Test
     void isMemberOrAdmin_ReturnsTrueWhenUserIsMember() {
         channel.addMember(user);
 
-        assertTrue(authorizationService.isMemberOrAdmin(user, channel));
+        assertTrue(AuthorizationUtils.isMemberOrAdmin(user, channel));
     }
 
     @Test
     void isMemberOrAdmin_ReturnsTrueWhenUserIsAdmin() {
         user.addRole(new Role(ERole.ROLE_ADMIN));
 
-        assertTrue(authorizationService.isMemberOrAdmin(user, channel));
+        assertTrue(AuthorizationUtils.isMemberOrAdmin(user, channel));
     }
 }
