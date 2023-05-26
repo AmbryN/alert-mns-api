@@ -8,6 +8,7 @@ import dev.ambryn.alertmntapi.errors.ForbiddenException;
 import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.ChannelRepository;
+import dev.ambryn.alertmntapi.repositories.UserRepository;
 import dev.ambryn.alertmntapi.security.MyUserDetails;
 import dev.ambryn.alertmntapi.services.AuthorizationService;
 import dev.ambryn.alertmntapi.services.ExtractionService;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,8 @@ public class ExportController {
     @Autowired
     ChannelRepository channelRepository;
     @Autowired
+    UserRepository userRepository;
+    @Autowired
     AuthorizationService authorizationService;
 
     @Autowired
@@ -49,9 +53,11 @@ public class ExportController {
 
         Channel channel = channelRepository.findById(id)
                                            .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + id));
-        User user = ((MyUserDetails) SecurityContextHolder.getContext()
-                                                          .getAuthentication()
-                                                          .getPrincipal()).getUser();
+        UserDetails userdetails = ((UserDetails) SecurityContextHolder.getContext()
+                                                                      .getAuthentication()
+                                                                      .getPrincipal());
+        User user = userRepository.findByEmail(userdetails.getUsername())
+                                  .orElseThrow(() -> new NotFoundException("Could not find user with email=" + userdetails.getUsername()));
 
         boolean isAllowedToExport = authorizationService.isMemberOrAdmin(user, channel);
         if (!isAllowedToExport) throw new ForbiddenException("You do not have permissions to do this action");

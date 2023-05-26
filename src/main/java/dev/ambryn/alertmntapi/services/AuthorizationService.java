@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Service
 public class AuthorizationService {
-  
+
     public boolean isMemberOrAdmin(User user, Channel channel) {
         return isAdmin(user) || isMember(user, channel);
     }
@@ -28,10 +28,7 @@ public class AuthorizationService {
     }
 
     public boolean isMember(User user, Channel channel) {
-        return user.getChannels()
-                   .stream()
-                   .filter(userChannel -> Objects.equals(userChannel.getId(), channel.getId()))
-                   .toList()
-                   .size() > 0;
+        return channel.getMembers()
+                      .contains(user);
     }
 }
