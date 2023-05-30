@@ -66,7 +66,7 @@ class ExportControllerTest {
         when(channelRepository.findById(1L)).thenReturn(Optional.of(new Channel("Test", EVisibility.PUBLIC)));
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
 
-        mvc.perform(get("/export/1"))
+        mvc.perform(get("/export/{id}", 1))
            .andExpect(status().isForbidden());
     }
 
@@ -84,7 +84,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1"))
+        mvc.perform(get("/export/{id}", 1))
            .andExpect(status().isOk())
            .andExpect(content().contentType("text/csv"));
     }
@@ -102,7 +102,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1"))
+        mvc.perform(get("/export/{id}", 1))
            .andExpect(status().isOk());
     }
 
@@ -119,7 +119,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1?format=csv"))
+        mvc.perform(get("/export/{id}", 1).param("format", "csv"))
            .andExpect(status().isOk())
            .andExpect(content().contentType("text/csv"));
     }
@@ -137,7 +137,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1?format=json"))
+        mvc.perform(get("/export/{id}", 1).param("format", "json"))
            .andExpect(status().isOk())
            .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -155,7 +155,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1?format=xml"))
+        mvc.perform(get("/export/{id}", 1).param("format", "xml"))
            .andExpect(status().isOk())
            .andExpect(content().contentType(MediaType.TEXT_XML));
     }
@@ -173,7 +173,7 @@ class ExportControllerTest {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // THEN
-        mvc.perform(get("/export/1?format=test"))
+        mvc.perform(get("/export/{id}", 1).param("format", "test"))
            .andExpect(status().isBadRequest());
     }
 }
