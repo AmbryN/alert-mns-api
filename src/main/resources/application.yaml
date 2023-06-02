@@ -32,5 +32,5 @@ jwt:
   secret: @JWT_SECRET@
 
 cors:
-  domain: http://localhost:4200
+  domain: @CORS_DOMAIN@
 
