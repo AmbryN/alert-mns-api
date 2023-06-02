@@ -51,6 +51,9 @@ VALUES (NOW(), 60, 'Test meeting', 3, 2, 1);
 INSERT INTO user_group(gro_id, gro_name)
 VALUES (1, 'CDA');
 
+INSERT INTO group_is_allowed_in(cha_id, gro_id)
+VALUES (1, 1);
+
 INSERT INTO is_member_of(gro_id, usr_id)
 VALUES (1, 1),
        (1, 2);

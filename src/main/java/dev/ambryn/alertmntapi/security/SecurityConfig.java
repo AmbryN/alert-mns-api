@@ -47,7 +47,7 @@ public class SecurityConfig {
             .and()
             .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login", "/chat")
                                                          .permitAll()
-                                                         .requestMatchers("/groups/**", "/roles/**")
+                                                         .requestMatchers("/groups/**", "/channels/**", "/roles/**")
                                                          .hasRole("ADMIN")
                                                          .requestMatchers("/**")
                                                          .hasAnyRole("USER", "ADMIN")

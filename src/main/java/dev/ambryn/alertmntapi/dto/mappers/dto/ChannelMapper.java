@@ -4,6 +4,7 @@ import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.dto.channel.ChannelCreateDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetFinestDTO;
+import dev.ambryn.alertmntapi.dto.group.GroupGetDTO;
 import dev.ambryn.alertmntapi.dto.message.MessageGetDTO;
 import dev.ambryn.alertmntapi.dto.user.UserGetDTO;
 import dev.ambryn.alertmntapi.enums.EVisibility;
@@ -35,7 +36,11 @@ public class ChannelMapper {
                                           .stream()
                                           .map(UserMapper::toDto)
                                           .toList();
+        List<GroupGetDTO> groups = channel.getGroups()
+                                          .stream()
+                                          .map(GroupMapper::toDTO)
+                                          .toList();
 
-        return new ChannelGetFinestDTO(id, name, visibility, members);
+        return new ChannelGetFinestDTO(id, name, visibility, members, groups);
     }
 }

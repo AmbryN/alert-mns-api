@@ -1,7 +1,9 @@
 package dev.ambryn.alertmntapi.controllers;
 
 import dev.ambryn.alertmntapi.beans.Channel;
+import dev.ambryn.alertmntapi.beans.Group;
 import dev.ambryn.alertmntapi.beans.User;
+import dev.ambryn.alertmntapi.dto.AddDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetFinestDTO;
 import dev.ambryn.alertmntapi.dto.message.MessageGetDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelCreateDTO;
@@ -14,6 +16,7 @@ import dev.ambryn.alertmntapi.errors.ForbiddenException;
 import dev.ambryn.alertmntapi.errors.InternalServerException;
 import dev.ambryn.alertmntapi.errors.NotFoundException;
 import dev.ambryn.alertmntapi.repositories.ChannelRepository;
+import dev.ambryn.alertmntapi.repositories.GroupRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
 import dev.ambryn.alertmntapi.responses.Created;
 import dev.ambryn.alertmntapi.responses.Ok;
@@ -35,6 +38,8 @@ public class ChannelController {
     ChannelRepository channelRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     JwtUtils jwtUtils;
 
@@ -102,5 +107,79 @@ public class ChannelController {
         }
 
         throw new ForbiddenException();
+    }
+
+    @PostMapping("/{id}/members")
+    public ResponseEntity<ChannelGetFinestDTO> addMembers(@PathVariable("id") Long id,
+                                                          @RequestBody List<AddDTO> membersToAdd) {
+        membersToAdd.forEach(BeanValidator::validate);
+
+        try {
+            Channel channel = channelRepository.findById(id)
+                                               .orElseThrow(() -> new NotFoundException(
+                                                       "Could not find channel with id=" + id));
+
+            membersToAdd.stream()
+                        .map(member -> userRepository.findById(member.id())
+                                                     .orElseThrow(() -> new NotFoundException(
+                                                             "Could not find user with id=" + member.id())))
+                        .forEach(channel::addMember);
+            channelRepository.save(channel);
+            return Ok.build(ChannelMapper.toFinestDTO(channel));
+        } catch (DataAccessException dae) {
+            throw new InternalServerException(dae.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/members/{memberId}")
+    public ResponseEntity<ChannelGetFinestDTO> removeMember(@PathVariable("id") Long id,
+                                                            @PathVariable("memberId") Long memberId) {
+        Channel channel = channelRepository.findById(id)
+                                           .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + id));
+        User user = userRepository.findById(memberId)
+                                  .orElseThrow(() -> new NotFoundException("Could not find user with id=" + memberId));
+
+        channel.removeMember(user);
+        channelRepository.save(channel);
+
+        return Ok.build(ChannelMapper.toFinestDTO(channel));
+    }
+
+    @PostMapping("/{id}/groups")
+    public ResponseEntity<ChannelGetFinestDTO> addGroups(@PathVariable("id") Long id,
+                                                         @RequestBody List<AddDTO> groupsToAdd) {
+        groupsToAdd.forEach(BeanValidator::validate);
+
+        try {
+            Channel channel = channelRepository.findById(id)
+                                               .orElseThrow(() -> new NotFoundException(
+                                                       "Could not find channel with id=" + id));
+
+            groupsToAdd.stream()
+                       .map(group -> groupRepository.findById(group.id())
+                                                    .orElseThrow(() -> new NotFoundException(
+                                                            "Could not find group with id=" + group.id())))
+                       .forEach(channel::addGroup);
+
+            channelRepository.save(channel);
+
+            return Ok.build(ChannelMapper.toFinestDTO(channel));
+        } catch (DataAccessException dae) {
+            throw new InternalServerException(dae.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}/groups/{groupId}")
+    public ResponseEntity<ChannelGetFinestDTO> removeGroup(@PathVariable("id") Long id,
+                                                           @PathVariable("groupId") Long groupId) {
+        Channel channel = channelRepository.findById(id)
+                                           .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + id));
+        Group group = groupRepository.findById(groupId)
+                                     .orElseThrow(() -> new NotFoundException("Could not find group with id=" + groupId));
+
+        channel.removeGroup(group);
+        channelRepository.save(channel);
+
+        return Ok.build(ChannelMapper.toFinestDTO(channel));
     }
 }

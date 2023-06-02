@@ -26,12 +26,21 @@ public class Channel {
     private EVisibility visibility;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "is_allowed_in", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id"))
+    @JoinTable(name = "is_allowed_in", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"),
+            inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id"))
     @ToString.Exclude
     private Set<User> members = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "has_subscribed_to", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName = "usr_id"))
+    @JoinTable(name = "group_is_allowed_in", joinColumns = @JoinColumn(name = "cha_id", referencedColumnName =
+            "cha_id"), inverseJoinColumns = @JoinColumn(name = "gro_id", referencedColumnName = "gro_id"))
+    @ToString.Exclude
+    private Set<Group> groups = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "has_subscribed_to", joinColumns = @JoinColumn(name = "cha_id",
+            referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName
+            = "usr_id"))
     @ToString.Exclude
     private Set<User> subscribers = new HashSet<>();
 
@@ -43,7 +52,8 @@ public class Channel {
     @ToString.Exclude
     private List<Meeting> meetings = new ArrayList<>();
 
-    public Channel() {}
+    public Channel() {
+    }
 
     public Channel(String name, EVisibility visibility) {
         this.name = name;
@@ -56,6 +66,18 @@ public class Channel {
 
     public void removeMember(User member) {
         this.members.remove(member);
+    }
+
+    public void addGroup(Group group) {
+        this.groups.add(group);
+        group.getMembers()
+             .forEach(this::addMember);
+    }
+
+    public void removeGroup(Group group) {
+        this.groups.remove(group);
+        group.getMembers()
+             .forEach(this::removeMember);
     }
 
     public void addSubscriber(User sub) {
