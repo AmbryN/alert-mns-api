@@ -119,7 +119,7 @@ public class Channel {
     }
 
     public void notifySubscribers() {
-        // TODO
+        this.subscribers.forEach(User::notify);
     }
 
     @Override

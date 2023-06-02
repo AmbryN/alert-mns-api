@@ -124,6 +124,10 @@ public class User {
         return Collections.unmodifiableSet(roles);
     }
 
+    public void notify(Notification notification) {
+        this.queue.add(notification);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
