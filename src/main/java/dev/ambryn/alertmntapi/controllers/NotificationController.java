@@ -33,14 +33,16 @@ public class NotificationController {
     JwtUtils jwtUtils;
 
     @GetMapping
-    public ResponseEntity<Set<NotificationDTO>> getNotifications(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<NotificationDTO>> getNotifications(@RequestHeader("Authorization") String token) {
         logger.debug("Getting all notifications");
         return jwtUtils.getEmailFromBearer(token)
                        .flatMap(email -> userRepository.findByEmail(email))
                        .map(User::getNotifications)
                        .map(notifications -> notifications.stream()
                                                           .map(NotificationMapper::toDTO)
-                                                          .collect(Collectors.toSet()))
+                                                          .sorted((n1, n2) -> n2.createdAt()
+                                                                                .compareTo(n1.createdAt()))
+                                                          .toList())
                        .map(Ok::build)
                        .orElseThrow(() -> new NotFoundException("Could not find user corresponding to Jwt"));
     }
@@ -62,6 +64,8 @@ public class NotificationController {
         return Ok.build(user.getNotifications()
                             .stream()
                             .map(NotificationMapper::toDTO)
+                            .sorted((n1, n2) -> n2.createdAt()
+                                                  .compareTo(n1.createdAt()))
                             .toList());
     }
 }
