@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     Logger logger = LoggerFactory.getLogger("MeetingRepository");
 
-    void deleteAllByOrganizerId(Long id);
+    void deleteAllByCreatorId(Long id);
 }

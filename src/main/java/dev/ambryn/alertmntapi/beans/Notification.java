@@ -32,8 +32,13 @@ public class Notification {
 
     public Notification() {}
 
-    public Notification(Subject sub) {
+    public Notification(User receiver, Subject sub) {
+        this.receiver = receiver;
         this.subject = sub;
+    }
+
+    public void markAsSeen() {
+        this.seenAt = LocalDateTime.now();
     }
 
     @Override

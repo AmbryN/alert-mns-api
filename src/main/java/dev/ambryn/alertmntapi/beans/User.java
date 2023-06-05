@@ -62,9 +62,9 @@ public class User {
     @ToString.Exclude
     private Set<Channel> channels = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "receiver")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "receiver")
     @ToString.Exclude
-    private Set<Notification> queue = new HashSet<>();
+    private Set<Notification> notifications = new HashSet<>();
 
     public User() {
     }
@@ -75,7 +75,7 @@ public class User {
         setLastname(lastname);
         setFirstname(firstname);
         this.roles = new HashSet<>();
-        this.queue = new HashSet<>();
+        this.notifications = new HashSet<>();
     }
 
     public void addRole(Role role) {
@@ -95,11 +95,11 @@ public class User {
     }
 
     public void addNotification(Notification notification) {
-        this.queue.add(notification);
+        this.notifications.add(notification);
     }
 
     public Set<Notification> getNotifications() {
-        return Collections.unmodifiableSet(queue);
+        return Collections.unmodifiableSet(notifications);
     }
 
     public void setEmail(String email) {
@@ -124,10 +124,6 @@ public class User {
         return Collections.unmodifiableSet(roles);
     }
 
-    public void notify(Notification notification) {
-        this.queue.add(notification);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,6 +137,6 @@ public class User {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, password, lastname, firstname, roles, queue);
+        return Objects.hash(id, email, password, lastname, firstname, roles);
     }
 }

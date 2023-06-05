@@ -27,10 +27,15 @@ public abstract class Subject {
     @JoinColumn(name = "sub_channel", nullable = false)
     protected Channel channel;
 
+    @ManyToOne(cascade = CascadeType.DETACH)
+    @JoinColumn(name = "sub_creator", nullable = false)
+    protected User creator;
+
     public Subject() {
     }
 
-    public Subject(Channel channel) {
+    public Subject(Channel channel, User creator) {
         this.channel = channel;
+        this.creator = creator;
     }
 }

@@ -14,11 +14,6 @@ import java.util.Objects;
 @ToString
 @Table(name = "Message")
 public class Message extends Subject {
-
-    @ManyToOne
-    @JoinColumn(name = "msg_sender", nullable = false)
-    private User sender;
-
     @Column(name = "msg_content", nullable = false)
     private String content;
 
@@ -35,8 +30,7 @@ public class Message extends Subject {
     }
 
     public Message(Channel channel, User sender, String content, File file) {
-        super(channel);
-        this.sender = sender;
+        super(channel, sender);
         this.content = content;
         this.file = file;
     }
@@ -50,13 +44,11 @@ public class Message extends Subject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
-        return Objects.equals(sender, message.sender)
-                && Objects.equals(content, message.content)
-                && Objects.equals(file, message.file);
+        return Objects.equals(content, message.content) && Objects.equals(file, message.file);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sender, content, file);
+        return Objects.hash(content, file);
     }
 }

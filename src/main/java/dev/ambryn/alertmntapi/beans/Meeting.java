@@ -25,10 +25,6 @@ public class Meeting extends Subject {
     @Column(name = "mee_duration")
     private int duration;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "mee_user", nullable = false)
-    private User organizer;
-
     public Meeting() {
 
     }
@@ -42,14 +38,12 @@ public class Meeting extends Subject {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Meeting meeting = (Meeting) o;
-        return duration == meeting.duration
-                && Objects.equals(name, meeting.name)
-                && Objects.equals(dateTime, meeting.dateTime)
-                && Objects.equals(organizer, meeting.organizer);
+        return duration == meeting.duration && Objects.equals(name, meeting.name) && Objects.equals(dateTime,
+                                                                                                    meeting.dateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, dateTime, duration, organizer);
+        return Objects.hash(name, dateTime, duration);
     }
 }

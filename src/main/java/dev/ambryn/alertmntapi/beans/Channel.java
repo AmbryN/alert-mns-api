@@ -37,7 +37,7 @@ public class Channel {
     @ToString.Exclude
     private Set<Group> groups = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(name = "has_subscribed_to", joinColumns = @JoinColumn(name = "cha_id",
             referencedColumnName = "cha_id"), inverseJoinColumns = @JoinColumn(name = "usr_id", referencedColumnName
             = "usr_id"))
@@ -62,10 +62,12 @@ public class Channel {
 
     public void addMember(User member) {
         this.members.add(member);
+        this.subscribers.add(member);
     }
 
     public void removeMember(User member) {
         this.members.remove(member);
+        this.subscribers.remove(member);
     }
 
     public void addGroup(Group group) {
@@ -98,6 +100,7 @@ public class Channel {
 
     public void addMessage(Message message) {
         this.messages.add(message);
+        this.notifySubscribers(message);
     }
 
     public List<User> getSubscribers() {
@@ -118,8 +121,13 @@ public class Channel {
         return Collections.unmodifiableList(meetings);
     }
 
-    public void notifySubscribers() {
-        this.subscribers.forEach(User::notify);
+    public void notifySubscribers(Subject notificationSubject) {
+        this.subscribers.stream()
+                        .filter(user -> user != notificationSubject.getCreator())
+                        .forEach(user -> {
+                            Notification notification = new Notification(user, notificationSubject);
+                            user.addNotification(notification);
+                        });
     }
 
     @Override

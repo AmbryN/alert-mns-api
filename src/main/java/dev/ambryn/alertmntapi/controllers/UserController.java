@@ -140,8 +140,8 @@ public class UserController {
         logger.debug("Delete user with id={}", id);
 
         channelRepository.deleteUserFromChannels(id);
-        messageRepository.deleteAllBySenderId(id);
-        meetingRepository.deleteAllByOrganizerId(id);
+        messageRepository.deleteAllByCreatorId(id);
+        meetingRepository.deleteAllByCreatorId(id);
         notificationRepository.deleteAllByReceiverId(id);
         groupRepository.deleteUserFromGroups(id);
 

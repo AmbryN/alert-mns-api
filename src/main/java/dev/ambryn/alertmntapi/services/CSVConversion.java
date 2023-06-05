@@ -25,7 +25,7 @@ public class CSVConversion implements ConversionStrategy {
     }
 
     private String convertToCSVLine(Message message) {
-        User sender = message.getSender();
+        User sender = message.getCreator();
         String joinedString = String.join(",",
                                           new String[]{sender.getFirstname(), sender.getLastname(),
                                                   message.getSentAt().toString(), message.getContent()});

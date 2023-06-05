@@ -20,7 +20,7 @@ public class MessageMapper {
     UserRepository userRepository;
 
     public static MessageGetDTO toDTO(Message message) {
-        User sender = message.getSender();
+        User sender = message.getCreator();
         UserGetDTO senderDTO = UserMapper.toDto(sender);
         return new MessageGetDTO(message.getId(), senderDTO, message.getContent(), null, null);
     }

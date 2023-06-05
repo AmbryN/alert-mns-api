@@ -12,9 +12,9 @@ public class JSONConversion implements ConversionStrategy {
     public byte[] convert(Channel channel) {
         ExtractedMessage[] messages = channel.getMessages()
                                              .stream()
-                                             .map(message -> new ExtractedMessage(message.getSender()
+                                             .map(message -> new ExtractedMessage(message.getCreator()
                                                                                          .getFirstname(),
-                                                                                  message.getSender()
+                                                                                  message.getCreator()
                                                                                          .getLastname(),
                                                                                   message.getSentAt()
                                                                                          .toString(),

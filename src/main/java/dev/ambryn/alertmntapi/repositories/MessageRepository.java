@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface MessageRepository extends JpaRepository<Message, Long> {
     Logger logger = LoggerFactory.getLogger("MessageRepository");
 
-    void deleteAllBySenderId(Long id);
+    void deleteAllByCreatorId(Long id);
 }
