@@ -5,6 +5,7 @@ import dev.ambryn.alertmntapi.beans.Group;
 import dev.ambryn.alertmntapi.beans.User;
 import dev.ambryn.alertmntapi.dto.AddDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetFinestDTO;
+import dev.ambryn.alertmntapi.dto.channel.ChannelUpdateDTO;
 import dev.ambryn.alertmntapi.dto.message.MessageGetDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelCreateDTO;
 import dev.ambryn.alertmntapi.dto.channel.ChannelGetDTO;
@@ -107,6 +108,24 @@ public class ChannelController {
         }
 
         throw new ForbiddenException();
+    }
+
+    @PutMapping
+    public ResponseEntity<ChannelGetFinestDTO> updateChannel(@RequestBody ChannelUpdateDTO channelCreateDTO) {
+        BeanValidator.validate(channelCreateDTO);
+
+        Channel channel = channelRepository.findById(channelCreateDTO.id())
+                                           .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + channelCreateDTO.id()));
+
+        channel.setName(channelCreateDTO.name());
+        channel.setVisibility(channelCreateDTO.visibility());
+
+        try {
+            channelRepository.save(channel);
+            return Ok.build(ChannelMapper.toFinestDTO(channel));
+        } catch (DataAccessException dae) {
+            throw new InternalServerException(dae.getMessage());
+        }
     }
 
     @PostMapping("/{id}/members")

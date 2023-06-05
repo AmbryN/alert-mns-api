@@ -127,7 +127,6 @@ public class UserController {
         user.addRole(role);
         try {
             userRepository.save(user);
-            System.out.println(user);
             return Created.build(UserMapper.toDto(user));
         } catch (DataAccessException dae) {
             throw new InternalServerException(dae.getMessage());
