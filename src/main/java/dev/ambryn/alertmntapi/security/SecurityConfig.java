@@ -2,7 +2,6 @@ package dev.ambryn.alertmntapi.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,10 +37,13 @@ public class SecurityConfig {
             .cors()
             .configurationSource(request -> {
                 CorsConfiguration cors = new CorsConfiguration();
-                cors.applyPermitDefaultValues();
-                cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
-                cors.setExposedHeaders(List.of("Content-Disposition"));
+                cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
+                cors.setExposedHeaders(List.of("Allow-Access-Control-Origin",
+                                               "Allow-Access-Control-Method",
+                                               "Content-Disposition"));
                 cors.setAllowedOrigins(List.of(domain));
+
+                cors.applyPermitDefaultValues();
                 return cors;
             })
             .and()

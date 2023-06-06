@@ -24,8 +24,6 @@ spring:
     default-property-inclusion: non_null
 
 server:
-  servlet:
-    context-path: /
   port: 8080
 
 jwt:
