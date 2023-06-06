@@ -6,6 +6,7 @@ import dev.ambryn.alertmntapi.repositories.UserRepository;
 import dev.ambryn.alertmntapi.security.JwtUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
@@ -31,6 +32,9 @@ public class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Value("${cors.domain}")
+    String domain;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
@@ -41,7 +45,7 @@ public class SocketBrokerConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat")
                 .addInterceptors(getWebSocketInterceptor())
-                .setAllowedOrigins("http://localhost:5173", "http://localhost:4200", "http://localhost");
+                .setAllowedOrigins("http://localhost:5173", "http://localhost:4200", "http://localhost", domain);
         //        registry.addEndpoint("/chat/")
         //                .setAllowedOrigins("http://localhost:5173")
         //                .withSockJS();
