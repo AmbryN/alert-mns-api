@@ -27,7 +27,7 @@ public class SecurityConfig {
     private JwtFilter jwtFilter;
 
     @Value("${cors.domain}")
-    private String domain;
+    String domain;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,7 +39,7 @@ public class SecurityConfig {
             .configurationSource(request -> {
                 CorsConfiguration cors = new CorsConfiguration();
                 cors.applyPermitDefaultValues();
-                cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
+                cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
                 cors.setExposedHeaders(List.of("Content-Disposition"));
                 cors.setAllowedOrigins(List.of(domain));
                 return cors;
