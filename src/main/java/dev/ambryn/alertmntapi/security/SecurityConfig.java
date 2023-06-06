@@ -41,7 +41,7 @@ public class SecurityConfig {
                 cors.applyPermitDefaultValues();
                 cors.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH"));
                 cors.setExposedHeaders(List.of("Content-Disposition"));
-                //                cors.setAllowedOrigins(List.of("*"));
+                cors.setAllowedOrigins(List.of(domain));
                 return cors;
             })
             .and()
