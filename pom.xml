@@ -127,7 +127,6 @@
                 <DB_INIT_FILE>mysql</DB_INIT_FILE>
                 <DB_INIT_MODE>always</DB_INIT_MODE>
                 <DB_SHOW_SQL>true</DB_SHOW_SQL>
-                <CORS_DOMAIN>http://localhost:4200</CORS_DOMAIN>
             </properties>
         </profile>
 
@@ -140,7 +139,6 @@
                 <DB_INIT_FILE>mysql</DB_INIT_FILE>
                 <DB_INIT_MODE>never</DB_INIT_MODE>
                 <DB_SHOW_SQL>false</DB_SHOW_SQL>
-                <CORS_DOMAIN>http://localhost</CORS_DOMAIN>
             </properties>
         </profile>
     </profiles>

@@ -1,0 +1,43 @@
+version: '4'
+services:
+  proxy:
+    image: nginx-proxy
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - phpmyadmin
+    restart: always
+
+  mariadb:
+    image: mariadb
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./alertmns_init.sql:/alertmns_init.sql
+    restart: always
+    environment:
+      MYSQL_DATABASE: alertmns
+
+  backend:
+    depends_on:
+      - mariadb
+    image: alertmns-backend
+    build:
+      context: .
+    restart: always
+    command: sh -c "/usr/local/tomcat/bin/catalina.sh run"
+
+  phpmyadmin:
+    depends_on:
+      - mariadb
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+
+volumes:
+  mysql_data: { }
+

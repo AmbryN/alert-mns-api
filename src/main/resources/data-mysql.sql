@@ -1,4 +1,4 @@
-USE discord;
+USE alertmns;
 
 INSERT INTO user(usr_email, usr_password, usr_lastname, usr_firstname)
 VALUES ('pierre.martin@message.fr', '$2a$10$7wEts30./7J7HvkJ/rIYOeYX8weaGPV6ybZCO73dZj7RrJedbrE0u', 'MARTIN', 'Pierre');
