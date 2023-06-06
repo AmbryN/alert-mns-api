@@ -63,6 +63,7 @@ public class UserMapper {
         List<ChannelGetDTO> channels = user.getChannels()
                                            .stream()
                                            .map(ChannelMapper::toDTO)
+                                           .sorted((c1, c2) -> Objects.compare(c1.id(), c2.id(), Long::compareTo))
                                            .toList();
         return new UserGetFinestDTO(id, email, lastname, firstname, roles, channels);
     }
