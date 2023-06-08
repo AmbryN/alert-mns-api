@@ -85,7 +85,7 @@ public class GroupController {
     }
 
     @PutMapping
-    public ResponseEntity<GroupGetDTO> updateGroup(@RequestBody GroupUpdateDTO updatedGroup) {
+    public ResponseEntity<GroupGetFinestDTO> updateGroup(@RequestBody GroupUpdateDTO updatedGroup) {
         BeanValidator.validate(updatedGroup);
 
         Group group = groupRepository.findById(updatedGroup.id())
@@ -93,7 +93,7 @@ public class GroupController {
         group.setName(updatedGroup.name());
         try {
             groupRepository.save(group);
-            return Ok.build(GroupMapper.toDTO(group));
+            return Ok.build(GroupMapper.toFinestDTO(group));
         } catch (DataAccessException ex) {
             throw new InternalServerException(ex.getMessage());
         }
