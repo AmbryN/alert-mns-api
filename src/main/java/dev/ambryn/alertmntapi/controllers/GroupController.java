@@ -6,6 +6,7 @@ import dev.ambryn.alertmntapi.dto.AddDTO;
 import dev.ambryn.alertmntapi.dto.GroupGetFinestDTO;
 import dev.ambryn.alertmntapi.dto.group.GroupCreateDTO;
 import dev.ambryn.alertmntapi.dto.group.GroupGetDTO;
+import dev.ambryn.alertmntapi.dto.group.GroupUpdateDTO;
 import dev.ambryn.alertmntapi.dto.mappers.dto.GroupMapper;
 import dev.ambryn.alertmntapi.dto.mappers.dto.UserMapper;
 import dev.ambryn.alertmntapi.dto.user.UserGetDTO;
@@ -84,10 +85,12 @@ public class GroupController {
     }
 
     @PutMapping
-    public ResponseEntity<GroupGetDTO> updateGroup(@RequestBody GroupCreateDTO updatedGroup) {
+    public ResponseEntity<GroupGetDTO> updateGroup(@RequestBody GroupUpdateDTO updatedGroup) {
         BeanValidator.validate(updatedGroup);
 
-        Group group = GroupMapper.toGroup(updatedGroup);
+        Group group = groupRepository.findById(updatedGroup.id())
+                                     .orElseThrow(() -> new NotFoundException("Could not find group with id=" + updatedGroup.id()));
+        group.setName(updatedGroup.name());
         try {
             groupRepository.save(group);
             return Ok.build(GroupMapper.toDTO(group));
