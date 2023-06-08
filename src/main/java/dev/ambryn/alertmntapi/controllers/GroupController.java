@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,10 +79,20 @@ public class GroupController {
             groupRepository.save(group);
             return Ok.build(GroupMapper.toDTO(group));
         } catch (DataAccessException dae) {
-            ApplicationError error = new ApplicationError.Builder().setCode(EError.ServerError)
-                                                                   .setMessage(dae.getMessage())
-                                                                   .build();
             throw new InternalServerException(dae.getMessage());
+        }
+    }
+
+    @PutMapping
+    public ResponseEntity<GroupGetDTO> updateGroup(@RequestBody GroupCreateDTO updatedGroup) {
+        BeanValidator.validate(updatedGroup);
+
+        Group group = GroupMapper.toGroup(updatedGroup);
+        try {
+            groupRepository.save(group);
+            return Ok.build(GroupMapper.toDTO(group));
+        } catch (DataAccessException ex) {
+            throw new InternalServerException(ex.getMessage());
         }
     }
 
