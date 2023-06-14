@@ -1,71 +1,84 @@
 package dev.ambryn.alertmntapi.controllers;
 
-import dev.ambryn.alertmntapi.beans.Channel;
+import dev.ambryn.alertmntapi.beans.Role;
 import dev.ambryn.alertmntapi.beans.User;
-import dev.ambryn.alertmntapi.enums.FileFormat;
+import dev.ambryn.alertmntapi.dto.mappers.dto.UserMapper;
+import dev.ambryn.alertmntapi.enums.ERole;
 import dev.ambryn.alertmntapi.errors.BadRequestException;
-import dev.ambryn.alertmntapi.errors.ForbiddenException;
-import dev.ambryn.alertmntapi.errors.NotFoundException;
-import dev.ambryn.alertmntapi.repositories.ChannelRepository;
+import dev.ambryn.alertmntapi.errors.InternalServerException;
+import dev.ambryn.alertmntapi.repositories.RoleRepository;
 import dev.ambryn.alertmntapi.repositories.UserRepository;
-import dev.ambryn.alertmntapi.services.AuthorizationUtils;
+import dev.ambryn.alertmntapi.responses.Ok;
 import dev.ambryn.alertmntapi.services.FileService;
-import jakarta.servlet.http.HttpServletResponse;
+import dev.ambryn.alertmntapi.validators.BeanValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @RestController
-@RequestMapping("/export")
-public class ExportController {
+@RequestMapping("/import")
+public class ImportController {
 
-    Logger logger = LoggerFactory.getLogger("ExportController");
-
-    @Autowired
-    ChannelRepository channelRepository;
-    @Autowired
-    UserRepository userRepository;
+    Logger logger = LoggerFactory.getLogger("ImportController");
 
     @Autowired
     FileService fileService;
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<byte[]> exportChannel(HttpServletResponse res,
-                                                @PathVariable("id") Long id,
-                                                @Param("format") Optional<String> format) {
-        logger.debug("Exporting Channel with id={}", id);
+    @Autowired
+    UserRepository userRepository;
 
-        Channel channel = channelRepository.findById(id)
-                                           .orElseThrow(() -> new NotFoundException("Could not find channel with id=" + id));
-        UserDetails userdetails = ((UserDetails) SecurityContextHolder.getContext()
-                                                                      .getAuthentication()
-                                                                      .getPrincipal());
-        User user = userRepository.findByEmail(userdetails.getUsername())
-                                  .orElseThrow(() -> new NotFoundException("Could not find user with email=" + userdetails.getUsername()));
+    @Autowired
+    RoleRepository roleRepository;
 
-        boolean isAllowedToExport = AuthorizationUtils.isMemberOrAdmin(user, channel);
-        if (!isAllowedToExport) throw new ForbiddenException("You do not have permissions to do this action");
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-        FileFormat fileFormat = format.map(String::toUpperCase)
-                                      .map(uppercaseFormat -> {
-                                          try {
-                                              return FileFormat.valueOf(uppercaseFormat);
-                                          } catch (IllegalArgumentException e) {
-                                              throw new BadRequestException("Format must be CSV, JSON or XML");
-                                          }
-                                      })
-                                      .orElse(FileFormat.CSV);
+    @PostMapping
+    public ResponseEntity<?> uploadFile(@RequestBody MultipartFile file) {
+        logger.debug("Import file");
+        if (!fileService.validateUploadedFile(file)) {
+            throw new BadRequestException("File is too large");
+        }
 
-        return fileService.generateFrom(channel, fileFormat);
+        try {
+            Role role = roleRepository.findByName(ERole.ROLE_USER)
+                                      .orElseThrow(() -> new InternalServerException("Could not find role ROLE_USER"));
+
+            String csv = new String(file.getBytes());
+            String[] lines = csv.split("\n");
+            List<User> users = Arrays.stream(lines)
+                                     .map(line -> {
+                                         String[] fields = line.split(",");
+                                         User user = new User();
+                                         user.setLastname(fields[0]);
+                                         user.setFirstname(fields[1]);
+                                         user.setEmail(fields[2]);
+                                         user.setPassword(passwordEncoder.encode(fields[3]));
+                                         user.addRole(role);
+                                         return user;
+                                     })
+                                     .toList();
+
+            users.forEach(BeanValidator::validate);
+
+            userRepository.saveAll(users);
+
+            return Ok.build(users.stream()
+                                 .map(UserMapper::toDto)
+                                 .toList());
+        } catch (IOException e) {
+            throw new InternalServerException("Could not read file");
+        }
     }
 }
