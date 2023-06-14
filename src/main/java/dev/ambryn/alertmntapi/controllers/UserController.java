@@ -138,12 +138,6 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
         logger.debug("Delete user with id={}", id);
 
-        channelRepository.deleteUserFromChannels(id);
-        messageRepository.deleteAllByCreatorId(id);
-        meetingRepository.deleteAllByCreatorId(id);
-        notificationRepository.deleteAllByReceiverId(id);
-        groupRepository.deleteUserFromGroups(id);
-
         userRepository.deleteById(id);
         return NoContent.build();
     }
