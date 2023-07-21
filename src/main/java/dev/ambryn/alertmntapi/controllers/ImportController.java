@@ -47,9 +47,6 @@ public class ImportController {
     @PostMapping
     public ResponseEntity<?> uploadFile(@RequestBody MultipartFile file) {
         logger.debug("Import file");
-        if (!fileService.validateUploadedFile(file)) {
-            throw new BadRequestException("File is too large");
-        }
 
         try {
             Role role = roleRepository.findByName(ERole.ROLE_USER)
