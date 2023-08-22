@@ -4,14 +4,12 @@ import dev.ambryn.alertmntapi.beans.Channel;
 import dev.ambryn.alertmntapi.beans.Message;
 import dev.ambryn.alertmntapi.beans.User;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-@SpringBootTest
 class CSVConversionTest {
 
     @Test
